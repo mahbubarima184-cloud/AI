@@ -1,22 +1,20 @@
 import tkinter as tk
-import math
+import math, random
 
-# --- Game State Variables ---
-current_player = 'X'  # Player is 'X', AI is 'O'
-board = [''] * 9      # 3x3 board (index 0-8)
+# --- Game State ---
+current_player = 'X'
+board = [''] * 9
 buttons = []
 game_over = False
 
-# --- Game Algorithms ---
+# --- Logic Functions ---
 def check_win(b, p):
-    win = [
-        (0,1,2),(3,4,5),(6,7,8), # Horizontal
-        (0,3,6),(1,4,7),(2,5,8), # Vertical
-        (0,4,8),(2,4,6)          # Diagonal
-    ]
-    for c in win:
-        if b[c[0]] == b[c[1]] == b[c[2]] == p:
-            return True, c
+    wins = [(0,1,2),(3,4,5),(6,7,8),
+            (0,3,6),(1,4,7),(2,5,8),
+            (0,4,8),(2,4,6)]
+    for a,b_,c in wins:
+        if b[a] == b[b_] == b[c] == p:
+            return True, (a,b_,c)
     return False, None
 
 def check_draw(b):
@@ -29,24 +27,27 @@ def minimax(b, depth, is_max):
     if check_win(b, 'O')[0]: return 10 - depth
     if check_win(b, 'X')[0]: return -10 + depth
     if check_draw(b): return 0
+
     if is_max:
         best = -math.inf
         for i in get_empty(b):
             b[i] = 'O'
-            score = minimax(b, depth+1, False)
+            best = max(best, minimax(b, depth + 1, False))
             b[i] = ''
-            best = max(best, score)
         return best
     else:
         best = math.inf
         for i in get_empty(b):
             b[i] = 'X'
-            score = minimax(b, depth+1, True)
+            best = min(best, minimax(b, depth + 1, True))
             b[i] = ''
-            best = min(best, score)
         return best
 
 def best_move(b):
+    # Add randomness: sometimes AI doesn't play the best move
+    if random.random() < 0.3:  # 30% chance of "mistake"
+        return random.choice(get_empty(b))
+
     best = -math.inf
     move = -1
     for i in get_empty(b):
@@ -66,18 +67,18 @@ def check_state():
     global game_over
     win, combo = check_win(board, 'X')
     if win:
-        update_status("Player X Wins!")
+        update_status("🎉 Player X Wins!")
         for i in combo: buttons[i].config(bg='green')
         game_over = True
         return
     win, combo = check_win(board, 'O')
     if win:
-        update_status("AI O Wins!")
-        for i in combo: buttons[i].config(bg='red')
+        update_status("🤖 AI O Wins!")
+        for i in combo: buttons[i].config(bg='orange')
         game_over = True
         return
     if check_draw(board):
-        update_status("It's a Draw!")
+        update_status("😐 It's a Draw!")
         game_over = True
         return
     update_status("Your turn! You are X")
@@ -94,7 +95,6 @@ def do_ai():
         board[idx] = 'O'
         buttons[idx].config(text='O', state=tk.DISABLED, fg='blue', font=('Arial', 24, 'bold'))
     check_state()
-    # Only update status and switch turn if game is not over
     if not game_over:
         current_player = 'X'
         update_status("Your turn! You are X")
@@ -117,29 +117,28 @@ def reset():
     game_over = False
     for b in buttons:
         b.config(text='', state=tk.NORMAL, bg='SystemButtonFace')
-    update_status("New Game! Your turn! You are X")
+    update_status("New Game! You are X")
 
-# --- Tkinter Window ---
+# --- GUI Setup ---
 root = tk.Tk()
-root.title("Easy Tic-Tac-Toe Minimax")
-status_label = tk.Label(root, text="New Game! Your turn! You are X", font=('Arial', 14, 'bold'), pady=10)
-status_label.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
-board_frame = tk.Frame(root)
-board_frame.grid(row=1, column=0, columnspan=3, padx=10, pady=10)
+root.title("Tic-Tac-Toe (Easy Minimax)")
+root.resizable(False, False)
+
+status_label = tk.Label(root, text="New Game! You are X", font=('Arial', 14, 'bold'))
+status_label.grid(row=0, column=0, columnspan=3, pady=10)
+
+frame = tk.Frame(root)
+frame.grid(row=1, column=0, columnspan=3)
+
 for i in range(9):
-    btn = tk.Button(board_frame, text='', font=('Arial', 24), width=4, height=2,
+    btn = tk.Button(frame, text='', width=5, height=2,
+                    font=('Arial', 24, 'bold'),
                     command=lambda i=i: click_btn(i))
     btn.grid(row=i//3, column=i%3, padx=5, pady=5)
     buttons.append(btn)
-new_game_btn = tk.Button(root, text="New Game", font=('Arial', 12, 'bold'), bg='lightblue',
-                         command=reset)
-new_game_btn.grid(row=2, column=0, columnspan=3, pady=20)
 
-if __name__ == "__main__":
-    root.mainloop()
+reset_btn = tk.Button(root, text="New Game", font=('Arial', 12, 'bold'),
+                      bg='lightblue', command=reset)
+reset_btn.grid(row=2, column=0, columnspan=3, pady=10)
 
-
-
-
-
-
+root.mainloop()
