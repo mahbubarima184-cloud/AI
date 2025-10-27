@@ -1,18 +1,31 @@
 
+## 💻 Algorithm Reference List
 
+All implementations are in Python:
 
+1.  A_star_search.py
+2.  Alpha_beta.py
+3.  BFS.py
+4.  Bidirectional_search.py
+5.  Beam_search.py
+6.  Best_first_search.py
+7.  Bidirectional_search(dfs).py
+8.  DFS.py
+9.  Depth_limited_search.py
+10. Iterative_depeening_search.py
+11. Min_Max.py
 
+---
 
+## 📑 Example Documentation: A* Search
 
+Below is the required format for documenting each algorithm:
 
+### *A\ Search** (A_star_search.py)
 
-
-
-
-
-
-
-
+* *i. How it Works:* A best-first search that uses the evaluation function $f(n) = g(n) + h(n)$ to find the shortest path, where $g(n)$ is the cost from the start and $h(n)$ is the estimated cost to the goal.
+* *ii. Applications:* Route finding in GPS/maps, game pathfinding (e.g., unit movement in strategy games).
+* *iii. Complexity:* *Time:* $O(b^d)$ (worst-case), *Space:* $O(b^d)$ (where $b$ is the branching factor and $d$ is the depth).
 
 
 
